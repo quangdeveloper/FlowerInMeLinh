@@ -9,6 +9,7 @@ import vn.chohoa.flower.model.Flower;
 @Repository
 public interface FlowerRepository extends JpaRepository<Flower,Long> {
 
+    @Query("select u from Flower  u")
     Page<Flower>  findAll(Pageable p);
 
 

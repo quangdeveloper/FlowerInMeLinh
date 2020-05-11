@@ -25,7 +25,7 @@ import vn.chohoa.flower.security.CustomUserDetailService;
         jsr250Enabled = true
 )
 public class SecurityConfig extends WebSecurityConfigurerAdapter implements WebMvcConfigurer {
-        // ahhihi test
+
 
     @Autowired
     private CustomUserDetailService customUserDetailService;
@@ -106,4 +106,5 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter implements WebM
                 .allowedMethods("POST", "GET", "DELETE", "PUT")
                 .maxAge(3600);
     }
+
 }
