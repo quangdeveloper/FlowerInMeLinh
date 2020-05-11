@@ -17,3 +17,15 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.MySQL8Dialect
         format_sql: true
+
+#        cấu hình để log chi tiết hơn
+logging:
+  level:
+    root=DEBUG:
+
+
+# cấu hình để thay đổi DB tu nơi khác không cần cố định trong code
+#jdbc:
+#  mysql:
+#    url=jdbc:mysql://host1:33060/loda:
+
