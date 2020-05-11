@@ -21,6 +21,9 @@ public class User extends BaseModel{
     @NotNull
     private String userName;
 
+    private String fireBase;
+
+
     @NotNull
     private String password;
 

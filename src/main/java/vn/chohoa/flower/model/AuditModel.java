@@ -4,22 +4,28 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.domain.AuditorAware;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import javax.persistence.*;
 
 import lombok.Builder.Default;
+import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 import vn.chohoa.flower.util.SecurityUtil;
 
 import java.time.LocalDateTime;
+
 
 @MappedSuperclass
 @SuperBuilder
 @NoArgsConstructor
 @Data
 @EntityListeners(AuditingEntityListener.class)//kich hoạt tựn đọng cập nhập của JPA
+
 public abstract class AuditModel {
 
     @Transient

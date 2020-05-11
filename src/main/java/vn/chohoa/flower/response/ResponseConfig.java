@@ -25,6 +25,9 @@ public class ResponseConfig {
 
     public void addResponse() {
         map.put("404", "Không tìm thấy tài nguyên");
+        map.put("405", "Lỗi 405");
+        map.put("406", "Lỗi 406");
+        map.put("409", "Tài nguyên đã tồn tại");
 
     }
 }
