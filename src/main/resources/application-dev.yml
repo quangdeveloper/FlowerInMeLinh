@@ -18,6 +18,13 @@ spring:
         dialect: org.hibernate.dialect.MySQL8Dialect
         format_sql: true
 
+  #/** cau hình cho file anh tai lên
+  servlet:
+    multipart:
+      enabled: true
+      max-request-size: 20MB
+      max-file-size: 10MB
+
 #        cấu hình để log chi tiết hơn
 logging:
   level:

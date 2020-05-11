@@ -66,7 +66,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter implements WebM
                 .authorizeRequests()
                 .antMatchers("/**")
                 .permitAll();
-
     }
 
     /**
@@ -106,5 +105,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter implements WebM
                 .allowedMethods("POST", "GET", "DELETE", "PUT")
                 .maxAge(3600);
     }
+
 
 }
