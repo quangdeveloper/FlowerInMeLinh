@@ -14,23 +14,24 @@ import vn.chohoa.flower.util.Constant;
 import javax.validation.Valid;
 
 @RestController
-@RequestMapping("/v1/api/users")
+@RequestMapping("/users")
 public class UserConstroller {
 
     @Autowired
     private UserServiceImpl userService;
 
 
+    @PostMapping
     @GetMapping
     public ResponseEntity<ResponseDTO> getListUser(@ApiParam @Valid PageParam p){
 
         return ResponseEntity.ok().body(
 
                 ResponseDTO.builder()
-                .map(userService.getListUser(p))
-                .code(Constant.RESPONSE.CODE.OK)
-                .message(Constant.RESPONSE.MESSAGE.OK)
-                .build()
+                        .map(userService.getListUser(p))
+                        .code(Constant.RESPONSE.CODE.OK)
+                        .message(Constant.RESPONSE.MESSAGE.OK)
+                        .build()
         );
 
     }

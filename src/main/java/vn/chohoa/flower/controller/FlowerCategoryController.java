@@ -14,7 +14,7 @@ import javax.validation.Valid;
 
 
 @RestController
-@RequestMapping("/api/flowercategories")
+@RequestMapping("/flowercategories")
 public class FlowerCategoryController {
 
     @Autowired

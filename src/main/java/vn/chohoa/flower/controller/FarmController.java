@@ -15,7 +15,7 @@ import vn.chohoa.flower.util.Constant;
 import javax.validation.Valid;
 
 @RestController
-@RequestMapping("/v1/api/farms")
+@RequestMapping("/farms")
 public class FarmController {
 
     @Autowired
