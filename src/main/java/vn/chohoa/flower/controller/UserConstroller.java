@@ -21,7 +21,6 @@ public class UserConstroller {
     private UserServiceImpl userService;
 
 
-    @PostMapping
     @GetMapping
     public ResponseEntity<ResponseDTO> getListUser(@ApiParam @Valid PageParam p){
 
