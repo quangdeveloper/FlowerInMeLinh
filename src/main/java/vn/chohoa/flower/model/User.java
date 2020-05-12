@@ -50,9 +50,6 @@ public class User extends BaseModel {
     private Boolean isWarningSpam = Boolean.FALSE;
 
     private String reasonSpam;
-//
-//    @OneToOne(mappedBy = "sender,receiver")
-//    private Conversation conversation;
 
 
 }
