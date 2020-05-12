@@ -37,11 +37,4 @@ public class Person extends BaseModel{
     @OneToOne(mappedBy = "person")
     private  User user;
 
-
-
-
-
-
-
-
 }

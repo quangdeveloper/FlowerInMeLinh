@@ -11,6 +11,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import vn.chohoa.flower.dto.LoginRequestDTO;
+import vn.chohoa.flower.dto.LoginResponseDTO;
 import vn.chohoa.flower.dto.ResponseDTO;
 import vn.chohoa.flower.dto.UserNewDTO;
 import vn.chohoa.flower.dto.apiParam.PageParam;
@@ -33,6 +34,8 @@ public class UserConstroller {
     @PostMapping("/login")
     public ResponseEntity<ResponseDTO> login(
             @RequestBody @Valid final LoginRequestDTO userLogin) {
+
+        /** lấy authentication ra để tạo theo kiểu token*/
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         userLogin.getUsername(),
@@ -40,11 +43,35 @@ public class UserConstroller {
                 )
         );
 
+        /** thiết lập authentication */
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
-        final User user = userService.
+        /** mỗi lần user đăng sẽ sinh ra 1 token mới nên pahir update token nay vào thông tin
+         * user để trong quá trình user thao tác data lấy đc token mới này
+         */
+        final User user = userService.updateToken(
+                userLogin.getUsername(),
+                userLogin.getPartner().getType(),
+                userLogin.getFirebaseToken()
+        );
+
+        /** tạo mới 1 response để trả data ra*/
+        final LoginResponseDTO loginResponseDTO = new LoginResponseDTO();
+
+        loginResponseDTO.setUserId(user.getId().toString());
+
+        loginResponseDTO.setUsername(user.getUserName());
+
+        loginResponseDTO.setFullname(user.getPerson().getFullName());
+
+        loginResponseDTO.setBirthday(user.getPerson().getBirthday());
+
+        loginResponseDTO.setEmail(user.getPerson().getEmail());
+
+        loginResponseDTO.setPersonId(user.getPerson().getId().toString());
 
 
+        return null;
     }
 
     @GetMapping

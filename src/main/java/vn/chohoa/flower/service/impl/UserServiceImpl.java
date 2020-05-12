@@ -11,6 +11,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.DigestUtils;
 import vn.chohoa.flower.dto.ActionDTO;
 import vn.chohoa.flower.dto.PageDTO;
 import vn.chohoa.flower.dto.UserDTO;
@@ -22,6 +23,8 @@ import vn.chohoa.flower.model.User;
 import vn.chohoa.flower.repository.UserRepository;
 import vn.chohoa.flower.service.UserService;
 import vn.chohoa.flower.util.Constant;
+import vn.chohoa.flower.util.PartnerEnum;
+import vn.chohoa.flower.util.PasswordUtil;
 
 import java.util.List;
 
@@ -37,23 +40,35 @@ public class UserServiceImpl implements UserService {
     @Autowired
     private UserMapper userMapper;
 
-//    @Autowired
-//    private PasswordEncoder passwordEncoder;
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
 
     @Override
-    public PageDTO getListUser(PageParam p){
+    public User updateToken(String username, String partner, String token) {
+
+        final User user = userRepository.findByUserName(username);
+
+        user.setPartner(PartnerEnum.valueOf(partner));
+
+        user.setFirebaseToken(token);
+
+        return userRepository.save(user);
+    }
+
+    @Override
+    public PageDTO getListUser(PageParam p) {
 
         Pageable pageable = PageRequest.of(
-                p.getPageNo()-1,
+                p.getPageNo() - 1,
                 p.getPageSize(),
                 Sort.by("id").descending()
         );
 
 
-       final  Page<User> page = userRepository.findAll(pageable);
+        final Page<User> page = userRepository.findAll(pageable);
 
-        List<UserDTO> list= page.map(userMapper::toUserDTOFromUser).getContent();
+        List<UserDTO> list = page.map(userMapper::toUserDTOFromUser).getContent();
 
         final long total = page.getTotalElements();
 
@@ -76,8 +91,11 @@ public class UserServiceImpl implements UserService {
 
         user = userMapper.toUserFromUserNewDTO(u);
 
-        BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
-        user.setPassword(encoder.encode(u.getPassword()));
+        String password = PasswordUtil.makeRadomPassword();
+
+        user.setPassword(passwordEncoder.encode(DigestUtils.md5DigestAsHex(password.getBytes())));
+
+        user.setPartner(PartnerEnum.web);
 
         user = userRepository.save(user);
 
