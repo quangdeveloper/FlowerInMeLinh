@@ -3,7 +3,6 @@ package vn.chohoa.flower.model;
 import com.sun.istack.NotNull;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
-import sun.plugin2.message.Conversation;
 import vn.chohoa.flower.util.PartnerEnum;
 
 import javax.persistence.*;
@@ -16,7 +15,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @SuperBuilder
-@ToString(exclude = {"role", "person", "imployee", ""})
+@ToString(exclude = {"role", "person"})
 @Table(uniqueConstraints = {@UniqueConstraint(columnNames = "person_id")})
 public class User extends BaseModel {
 
@@ -50,6 +49,9 @@ public class User extends BaseModel {
     private Boolean isWarningSpam = Boolean.FALSE;
 
     private String reasonSpam;
+
+    @ManyToMany(mappedBy = "users")
+    List<Conversation> conversations = new ArrayList<>();
 
 
 }

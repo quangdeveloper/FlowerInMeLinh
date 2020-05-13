@@ -75,7 +75,6 @@ public class UserConstroller {
     }
 
     @GetMapping
-
     public ResponseEntity<ResponseDTO> getListUser(@ApiParam @Valid PageParam p) {
 
         return ResponseEntity.ok().body(
@@ -88,6 +87,7 @@ public class UserConstroller {
         );
 
     }
+
 
     @PostMapping
     public ResponseEntity<ResponseDTO> createUser(@RequestBody @Valid UserNewDTO u) {

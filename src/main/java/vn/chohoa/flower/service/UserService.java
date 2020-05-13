@@ -12,5 +12,7 @@ public interface UserService {
 
     PageDTO getListUser(PageParam p);
 
+    PageDTO getListUserConversationDTO(PageParam p);
+
     User updateToken(String username, String partner, String token);
 }

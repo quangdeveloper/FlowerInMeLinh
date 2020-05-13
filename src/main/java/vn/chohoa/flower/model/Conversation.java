@@ -7,6 +7,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedDate;
 
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import vn.chohoa.flower.util.SecurityUtil;
 
 import javax.persistence.*;
@@ -14,52 +16,46 @@ import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
+@EntityListeners(AuditingEntityListener.class)
 @Builder
 @Entity
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Table(uniqueConstraints = {
-        @UniqueConstraint(columnNames = "code")
-})
-public class Consversation {
+@Table
+public class Conversation {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotNull
-    private Long code;
-
-    @Column(updatable = false)
-    private String senderUsername;
-
-
-    private String receiverUsername;
+    private String code;
 
     @Column(updatable = false)
     private Long senderId;
 
-    private Long receiverId;
+    @Column(updatable = false)
+    private String senderUsername;
 
-    private String senderName;
+    private Long editorId;
 
-    private String receiverName;
+    private String editorUsername;
 
-    @Min(1)
-    @NotNull
+    @ManyToMany(fetch = FetchType.LAZY)
+    private List<User> users = new ArrayList<>();
+
     private String content;
 
-    private byte[] fileContent;
+    private String fileContent;
 
-
+    @CreatedDate
     private LocalDateTime receivedTime;
 
-    @NotNull
     @CreatedDate
     private LocalDateTime sendedTime;
-
 
     /**
      * tin nhắn bị người dung vô hiệu hóa
@@ -72,7 +68,6 @@ public class Consversation {
      */
     @Builder.Default
     private Boolean isSend = Boolean.TRUE;
-
 
     /**
      * check xem người nhận đã xem chưa
@@ -90,16 +85,16 @@ public class Consversation {
      */
     private Boolean isSpam;
 
+    private String reasonSpam;
+
+    @LastModifiedDate
+    private LocalDateTime editTime;
+
     /**
      * mã biểu tượng đang sử dụng
      */
-    private long idMoji;
-
-    /**
-     * mã nhóm biểu tượng đang sử dụng
-     */
-    private Long idGroupMoji;
-
+    @ManyToOne(fetch = FetchType.LAZY)
+    private Moji moji;
 
     /**
      * khi thêm mới conversation
@@ -113,6 +108,7 @@ public class Consversation {
     @Transient
     private UserAuditModel updatedByUser;
 
+
     @PrePersist
     public void beforeCreate() {
         createdByUser = SecurityUtil.getUserAuditModel();
@@ -122,4 +118,12 @@ public class Consversation {
         }
     }
 
+    @PreUpdate
+    public void beforeUpdate() {
+        updatedByUser = SecurityUtil.getUserAuditModel();
+        if (createdByUser != null) {
+            editorId = updatedByUser.getId();
+            editorUsername = updatedByUser.getUsername();
+        }
+    }
 }

@@ -83,7 +83,7 @@ public class RoleServiceImpl implements RoleService {
                 Sort.by("id").descending()
         );
 
-        Page<Role> page = roleRepository.findAll(pageable);
+        final Page<Role> page = roleRepository.findAll(pageable);
 
         List<RoleDTO> list = page.map(roleMapper::toRoleDTOFromRole).getContent();
 

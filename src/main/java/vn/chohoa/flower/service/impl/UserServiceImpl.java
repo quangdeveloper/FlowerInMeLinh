@@ -12,10 +12,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.DigestUtils;
-import vn.chohoa.flower.dto.ActionDTO;
-import vn.chohoa.flower.dto.PageDTO;
-import vn.chohoa.flower.dto.UserDTO;
-import vn.chohoa.flower.dto.UserNewDTO;
+import vn.chohoa.flower.dto.*;
 import vn.chohoa.flower.dto.apiParam.PageParam;
 import vn.chohoa.flower.exception.GeneralException;
 import vn.chohoa.flower.mapper.UserMapper;
@@ -69,6 +66,28 @@ public class UserServiceImpl implements UserService {
         final Page<User> page = userRepository.findAll(pageable);
 
         List<UserDTO> list = page.map(userMapper::toUserDTOFromUser).getContent();
+
+        final long total = page.getTotalElements();
+
+        return PageDTO.builder()
+                .content(list)
+                .total(total)
+                .build();
+    }
+
+
+    public PageDTO getListUserConversationDTO(PageParam p) {
+
+        Pageable pageable = PageRequest.of(
+                p.getPageNo() - 1,
+                p.getPageSize(),
+                Sort.by("id").descending()
+        );
+
+
+        final Page<User> page = userRepository.findAll(pageable);
+
+        List<UserConversationDTO> list = page.map(userMapper::toUserConversationDtoFromUser).getContent();
 
         final long total = page.getTotalElements();
 
