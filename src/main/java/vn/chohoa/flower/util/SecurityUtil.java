@@ -58,7 +58,6 @@ public class SecurityUtil {
                         .build();
             }
         }
-
         return new UserAuditModel();
     }
 

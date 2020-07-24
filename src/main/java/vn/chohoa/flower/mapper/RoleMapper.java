@@ -1,7 +1,6 @@
 package vn.chohoa.flower.mapper;
 
 import org.mapstruct.Mapper;
-import org.mapstruct.Mappings;
 import vn.chohoa.flower.dto.RoleDTO;
 import vn.chohoa.flower.dto.RoleNewDTO;
 import vn.chohoa.flower.dto.RoleUpdateDTO;

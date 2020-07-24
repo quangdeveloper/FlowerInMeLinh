@@ -5,17 +5,16 @@ import lombok.*;
 import lombok.experimental.SuperBuilder;
 
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.OneToOne;
 import javax.validation.constraints.Size;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @SuperBuilder
 @Entity
-@ToString(exclude = {"user"})
 public class Person extends BaseModel{
 
     @NotNull
@@ -28,13 +27,9 @@ public class Person extends BaseModel{
     private String phone;
 
     @Size(max = 1000)
-
-    private String avatar;
-
-    @Size(max = 1000)
     private String email;
 
-    @OneToOne(mappedBy = "person")
+    @OneToOne(mappedBy = "person",fetch = FetchType.LAZY)
     private  User user;
 
 }

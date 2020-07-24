@@ -12,6 +12,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import vn.chohoa.flower.dto.ActionDTO;
 import vn.chohoa.flower.dto.FarmDTO;
+import vn.chohoa.flower.dto.FarmNewDTO;
 import vn.chohoa.flower.dto.PageDTO;
 import vn.chohoa.flower.dto.apiParam.GetListFarmParam;
 import vn.chohoa.flower.dto.apiParam.PageParam;
@@ -23,6 +24,8 @@ import vn.chohoa.flower.repository.FarmRepository;
 import vn.chohoa.flower.service.FarmService;
 import vn.chohoa.flower.util.Constant;
 
+import java.time.LocalDateTime;
+import java.util.Base64;
 import java.util.List;
 
 @Service
@@ -93,17 +96,11 @@ public class FarmServiceImpl implements FarmService {
     }
 
 
-    public ActionDTO insertFarm(FarmDTO farmDTO) {
+    public ActionDTO insertFarm(FarmNewDTO farmDTO) {
 
-        Farm f = farmRepository.findByCode(farmDTO.getCode());
-        if (f != null) throw new GeneralException(
-                Constant.RESPONSE.CODE.C409,
-                Constant.RESPONSE.MESSAGE.C409,
-                ImmutableMap.builder()
-                        .put(Constant.RESPONSE.JSON_KEY.RETURN_VALUE, 0)
-                        .build()
-        );
-        Farm farm = farmMapper.toFarmFromFarmDTO(farmDTO);
+        Farm farm = farmMapper.toFarmFromFarmNewDTO(farmDTO);
+
+        farm.setCode(AutoCode(LocalDateTime.now().toString()));
 
         farm = farmRepository.save(farm);
 
@@ -111,9 +108,7 @@ public class FarmServiceImpl implements FarmService {
                 ImmutableMap.builder()
                         .put(Constant.RESPONSE.JSON_KEY.RETURN_VALUE, farm.getId())
                         .build()
-
         );
-
     }
 
     public ActionDTO updateFarm(FarmDTO f) {
@@ -189,4 +184,11 @@ public class FarmServiceImpl implements FarmService {
                 .total(total)
                 .build();
     }
+
+    private String AutoCode(String str){
+
+        String code = "FARM_"+Base64.getUrlEncoder().encodeToString(str.getBytes());
+        return code;
+    }
+
 }

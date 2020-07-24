@@ -17,22 +17,52 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.MySQL8Dialect
         format_sql: true
+  quartz:
+    job-store-type: memory
+    properties:
+      org:
+        quartz:
+          threadPool:
+            threadCount: 5
 
-  #/** cau hình cho file anh tai lên
+  # cau hình cho file anh tai lên
   servlet:
     multipart:
       enabled: true
       max-request-size: 20MB
       max-file-size: 10MB
-
-#        cấu hình để log chi tiết hơn
-logging:
+  #      cau hinh log
+  logging:
   level:
-    root=DEBUG:
+  org:
+  springframework:
+  web:
+  filter:
+  CommonsRequestLoggingFilter: DEBUG
+
+#fire base configuration
+app:
+  firebase-configuration-file: flower-in-me-linh-firebase-adminsdk-41ovu-02f4b827f4.json
+  jwt:
+    secret: KYIVtA7915PUEWTqTca74sENpw48u7nkzSJiJmitF7D2PJWOu
+    expriedTime: 6000000
+
+config:
+  mail:
+    username: muadongquehuongtoi@gmail.com
+    password: fqfwqlpvlevjqazs
+    host: smtp.gmail.com
+    port: 587
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+        amount: 1
+dir:
+  attackMail: F:\\FlowerInMeLinhSources\\AttackmentMail\\
+  avatar: F:\\FlowerInMeLinhSources\\Avatar\\
 
 
-# cấu hình để thay đổi DB tu nơi khác không cần cố định trong code
-#jdbc:
-#  mysql:
-#    url=jdbc:mysql://host1:33060/loda:
 

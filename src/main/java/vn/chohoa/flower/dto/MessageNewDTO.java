@@ -1,11 +1,12 @@
 package vn.chohoa.flower.dto;
 
-import com.sun.istack.NotNull;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import javax.validation.constraints.NotNull;
 import java.util.List;
 
 @AllArgsConstructor
@@ -14,20 +15,13 @@ import java.util.List;
 @Builder
 public class MessageNewDTO {
 
-    @NotNull
-    private Long senderId;
-
-    @NotNull
-    private String senderUsername;
-
-    @NotNull
-    private List<Long> userIds;//danh sach user tham gia hoi thoai
-
-
     private String content;
 
-    private String contentFile;
+    private String fileContent;
 
-    private Long idMoji;
+    private Long moji;
+
+    @NotNull
+    private long id;
 
 }

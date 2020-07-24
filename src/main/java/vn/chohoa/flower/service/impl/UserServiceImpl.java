@@ -3,6 +3,7 @@ package vn.chohoa.flower.service.impl;
 import com.google.common.collect.ImmutableMap;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -16,10 +17,12 @@ import vn.chohoa.flower.dto.*;
 import vn.chohoa.flower.dto.apiParam.PageParam;
 import vn.chohoa.flower.exception.GeneralException;
 import vn.chohoa.flower.mapper.UserMapper;
+import vn.chohoa.flower.model.Role;
 import vn.chohoa.flower.model.User;
 import vn.chohoa.flower.repository.UserRepository;
 import vn.chohoa.flower.service.UserService;
 import vn.chohoa.flower.util.Constant;
+import vn.chohoa.flower.util.FileUtil;
 import vn.chohoa.flower.util.PartnerEnum;
 import vn.chohoa.flower.util.PasswordUtil;
 
@@ -31,6 +34,8 @@ import java.util.List;
 @Service
 public class UserServiceImpl implements UserService {
 
+    @Value("${dir.avatar}")
+    private String dirAvatar;
     @Autowired
     private UserRepository userRepository;
 
@@ -39,7 +44,6 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
-
 
     @Override
     public User updateToken(String username, String partner, String token) {
@@ -55,14 +59,14 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public PageDTO getListUser(PageParam p) {
+        User user = userRepository.findByID(1L);
+        List<Role> roles = user.getRoles();
 
         Pageable pageable = PageRequest.of(
                 p.getPageNo() - 1,
                 p.getPageSize(),
                 Sort.by("id").descending()
         );
-
-
         final Page<User> page = userRepository.findAll(pageable);
 
         List<UserDTO> list = page.map(userMapper::toUserDTOFromUser).getContent();
@@ -75,27 +79,26 @@ public class UserServiceImpl implements UserService {
                 .build();
     }
 
-
-    public PageDTO getListUserConversationDTO(PageParam p) {
-
-        Pageable pageable = PageRequest.of(
-                p.getPageNo() - 1,
-                p.getPageSize(),
-                Sort.by("id").descending()
-        );
-
-
-        final Page<User> page = userRepository.findAll(pageable);
-
-        List<UserConversationDTO> list = page.map(userMapper::toUserConversationDtoFromUser).getContent();
-
-        final long total = page.getTotalElements();
-
-        return PageDTO.builder()
-                .content(list)
-                .total(total)
-                .build();
-    }
+//    public PageDTO getListUserConversationDTO(PageParam p) {
+//
+//        Pageable pageable = PageRequest.of(
+//                p.getPageNo() - 1,
+//                p.getPageSize(),
+//                Sort.by("id").descending()
+//        );
+//
+//
+//        final Page<User> page = userRepository.findAll(pageable);
+//
+//        List<UserConversationDTO> list = page.map(userMapper::toUserConversationDtoFromUser).getContent();
+//
+//        final long total = page.getTotalElements();
+//
+//        return PageDTO.builder()
+//                .content(list)
+//                .total(total)
+//                .build();
+//    }
 
     @Override
     public ActionDTO createUser(UserNewDTO u) {
@@ -110,9 +113,15 @@ public class UserServiceImpl implements UserService {
 
         user = userMapper.toUserFromUserNewDTO(u);
 
-        String password = PasswordUtil.makeRadomPassword();
+        user.setPassword(passwordEncoder.encode(u.getPassword()));
 
-        user.setPassword(passwordEncoder.encode(DigestUtils.md5DigestAsHex(password.getBytes())));
+        user.setIsDeleted(false);
+
+        user.setIsActive(true);
+
+        user.setIsNeedChangePass(false);
+
+        user.setIsWarningSpam(false);
 
         user.setPartner(PartnerEnum.web);
 
@@ -122,5 +131,18 @@ public class UserServiceImpl implements UserService {
                 .put(Constant.RESPONSE.JSON_KEY.RETURN_VALUE, user.getId())
                 .build()
         );
+    }
+
+    @Override
+    public ActionDTO changeAvatar(UserChangeAvatarDTO user) {
+
+        User old = userRepository.findById(user.getId()).orElseThrow(
+                () -> new GeneralException(Constant.RESPONSE.CODE.C404,
+                        Constant.RESPONSE.MESSAGE.C404_USER)
+        );
+        userRepository.changeAvatar(FileUtil.multipartfileToFile(user.getAvatar(),this.dirAvatar),user.getId());
+        return new ActionDTO(ImmutableMap.builder()
+                .put(Constant.RESPONSE.JSON_KEY.RETURN_VALUE, user.getId())
+                .build());
     }
 }

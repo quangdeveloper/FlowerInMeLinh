@@ -27,7 +27,7 @@ public class UserNewDTO {
     private String  password;
 
     @NotEmpty
-    private List<Role> roles= new ArrayList<>();
+    private List<Long> roles;
 
     @NotNull
     private PersonNewDTO personNewDTO;

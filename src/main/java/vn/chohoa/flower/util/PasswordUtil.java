@@ -18,7 +18,7 @@ public class PasswordUtil {
          * thiết lập quy tắc sinh mật khẩu:  CharacterRule() method
          *
          * EnglishCharacterData.Digit: kiểu số
-         * password lá số chứa ít nhất 1 số
+         * password chứa ít nhất 1 số
          * */
         List rule = Arrays.asList(new CharacterRule(EnglishCharacterData.Digit, 1));
 

@@ -29,8 +29,8 @@ public class Moji extends BaseModel {
 
     private String groupName;
 
-    private String content;
+    private String linkMoji;
 
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "moji")
-    private List<Conversation> conversations = new ArrayList<>();
+    private List<Message>  messages= new ArrayList<>();
 }

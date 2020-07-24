@@ -14,7 +14,7 @@ import java.util.stream.Collectors;
 
 /**
  * Tự tao Userprincipal không sử dụng mặc định của spring security ??
- *
+ * <p>
  * đặt jsonignore cho thuộc tính password để bỏ qua filed data khi chuyển thành json
  * để gửi đi
  */
@@ -27,16 +27,17 @@ public class UserPrincipal implements UserDetails {
     @JsonIgnore
     private String password;
 
+    private Collection<? extends GrantedAuthority> authorities;
+
     private boolean active;
 
     public UserPrincipal() {
     }
 
     /**
-     *
      * lấy tập quyền của user
      * chuyển thành list <grandtedAuthority>
-     *     tap grandted authori để làm gì??
+     * tap grandted authori để làm gì??
      */
     public UserPrincipal(final User user) {
 
@@ -49,16 +50,15 @@ public class UserPrincipal implements UserDetails {
 
         this.username = user.getUserName();
 
-        this.password =user.getPassword();
+        this.password = user.getPassword();
 
         this.authorities = authorities;
 
         this.active = user.getIsActive();
     }
 
-    private Collection<?extends GrantedAuthority> authorities;
 
-    public Long getId(){
+    public Long getId() {
         return id;
     }
 
@@ -84,17 +84,17 @@ public class UserPrincipal implements UserDetails {
 
     @Override
     public boolean isAccountNonLocked() {
-        return active;
+        return true;
     }
 
     @Override
     public boolean isCredentialsNonExpired() {
-        return false;
+        return true;
     }
 
     @Override
     public boolean isEnabled() {
-        return false;
+        return true;
     }
 
     @Override
@@ -105,7 +105,7 @@ public class UserPrincipal implements UserDetails {
 
         UserPrincipal userPrincipal = (UserPrincipal) obj;
 
-        return Objects.equals(id,userPrincipal.id);
+        return Objects.equals(id, userPrincipal.id);
     }
 
     @Override

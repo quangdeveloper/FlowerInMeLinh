@@ -4,7 +4,6 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Mappings;
 import org.mapstruct.Named;
-import vn.chohoa.flower.dto.UserConversationDTO;
 import vn.chohoa.flower.dto.UserDTO;
 import vn.chohoa.flower.dto.UserNewDTO;
 import vn.chohoa.flower.model.User;
@@ -15,7 +14,8 @@ import java.util.List;
 public interface UserMapper {
 
     @Mappings({
-            @Mapping(target = "person",source = "personNewDTO")
+            @Mapping(target = "person",source = "personNewDTO"),
+            @Mapping(target = "roles",source = "roles",ignore = true)
     })
     User toUserFromUserNewDTO(UserNewDTO u);
 
@@ -28,14 +28,14 @@ public interface UserMapper {
     })
     UserDTO toUserDTOFromUser(User u);
 
-    @Mappings({
-            @Mapping(target = "id", source = "id"),
-            @Mapping(target = "userName", source = "userName"),
-            @Mapping(target = "fullName", source = "person.fullName")
-    })
-    UserConversationDTO toUserConversationDtoFromUser(User u);
-
-    @Named("mapUserConWithUser")
-    List<UserConversationDTO> toUserConversationDtoFromUsers(List<User> u);
+//    @Mappings({
+//            @Mapping(target = "id", source = "id"),
+//            @Mapping(target = "userName", source = "userName"),
+//            @Mapping(target = "fullName", source = "person.fullName")
+//    })
+//    UserConversationDTO toUserConversationDtoFromUser(User u);
+//
+//    @Named("mapUserConWithUser")
+//    List<UserConversationDTO> toUserConversationDtoFromUsers(List<User> u);
 
 }

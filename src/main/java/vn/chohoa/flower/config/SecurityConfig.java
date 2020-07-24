@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.BeanIds;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
@@ -14,8 +15,11 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+import vn.chohoa.flower.jwt.JWTAuthenticationEntryPoint;
+import vn.chohoa.flower.jwt.JWTAuthenticationFilter;
 import vn.chohoa.flower.security.CustomUserDetailService;
 
 @EnableWebSecurity
@@ -36,6 +40,14 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter implements WebM
         return super.authenticationManagerBean();
     }
 
+    @Autowired
+    private JWTAuthenticationEntryPoint authenticationEntryPoint;
+
+    @Bean
+    public JWTAuthenticationFilter JwtAuthenticationFilter() {
+        return new JWTAuthenticationFilter();
+    }
+
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
@@ -48,24 +60,26 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter implements WebM
 
     }
 
-    @Value("${app.nonAuthen")
-    private String nonAuthen;
-
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-        String[] nonAuthens = nonAuthen.split("\\|");
-        http
-                .cors()// để sử dụng tài nguyên chéo từ domain sang domain khác
+
+        http.csrf().disable()
+                .cors()
                 .and()
-                .csrf().disable()
                 .exceptionHandling()
-                .and()
-                .sessionManagement()
-                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                .authenticationEntryPoint(authenticationEntryPoint)
                 .and()
                 .authorizeRequests()
-                .antMatchers("/**")
-                .permitAll();
+//                .antMatchers(
+//                        "/users/login/**",
+//                        "/swagger-ui.html/**",
+//                        "/swagger-resources",
+//                        "/swagger-resources/**",
+//                        "/flowerInMeLinh/**"
+//                ).permitAll()
+                .antMatchers("/**").permitAll();
+
+        http.addFilterBefore(JwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
     }
 
     /**

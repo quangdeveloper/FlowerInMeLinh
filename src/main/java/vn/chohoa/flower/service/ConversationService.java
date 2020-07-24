@@ -1,18 +1,26 @@
 package vn.chohoa.flower.service;
 
 import vn.chohoa.flower.dto.*;
-import vn.chohoa.flower.dto.apiParam.GetListConversationParam;
+import vn.chohoa.flower.dto.apiParam.DeleteParam;
+import vn.chohoa.flower.dto.apiParam.GetConversationParam;
+import vn.chohoa.flower.dto.apiParam.PageParam;
+
+import java.util.List;
 
 public interface ConversationService {
 
-    ActionDTO createMessage(MessageNewDTO message);
+    ActionDTO createConversation(ConversationNewDTO con);
 
-    ActionDTO updateContentMessage(MessageUpdateDTO message);
+    ActionDTO deleteConversation(ConversationDeleteDTO con);
 
-    ActionDTO deleteContentMessage(MessageDeleteDTO message);
+    ActionDTO deleteConversationV2(DeleteParam d);
 
-    ActionDTO isViewMessage(MessageViewerDTO message);
+    ActionDTO updateUser(UpdateUserConversation u);
 
-    PageDTO findConversationByCode(GetListConversationParam p);
+    PageDTO findAll(PageParam p);
+
+    RsDTO findbyUserId(GetConversationParam p);
+
+
 
 }

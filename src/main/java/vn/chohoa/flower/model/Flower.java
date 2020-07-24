@@ -15,7 +15,6 @@ import java.util.List;
 @Table
 public class Flower extends BaseModel{
 
-
     @NotNull
     private String name;
 

@@ -8,7 +8,7 @@ import lombok.Data;
 import javax.validation.constraints.NotNull;
 
 @Data
-@JsonPropertyOrder({"paggNo","pageSize"})
+@JsonPropertyOrder({"pageNo","pageSize"})
 public class PageParam {
 
     @NotNull

@@ -1,6 +1,6 @@
 server:
   servlet:
-    context-path: /flower_api
+    context-path: /flowerInMeLinh
 
 spring:
   profiles:

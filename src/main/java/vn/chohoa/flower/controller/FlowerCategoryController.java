@@ -28,7 +28,6 @@ public class FlowerCategoryController {
                 .code(Constant.RESPONSE.CODE.OK)
                 .message(Constant.RESPONSE.MESSAGE.OK)
                 .build()
-
         );
     }
 
@@ -40,7 +39,6 @@ public class FlowerCategoryController {
                 .code(Constant.RESPONSE.CODE.OK)
                 .message(Constant.RESPONSE.MESSAGE.OK)
                 .build()
-
         );
     }
 
@@ -54,7 +52,6 @@ public class FlowerCategoryController {
                 .build()
         );
     }
-
 
     @PutMapping
     public ResponseEntity<Object> updateCategory(@RequestBody @Valid  FlowerCategoryDTO f)

@@ -83,6 +83,10 @@ public class FlowerServiceImpl implements FlowerService {
 
         flower.setFlowerCategory(cate);
 
+        flower.setIsSale(false);
+
+        flower.setIsActive(true);
+
         flower = flowerRepository.save(flower);
 
         return new ActionDTO(

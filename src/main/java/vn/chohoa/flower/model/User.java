@@ -1,12 +1,12 @@
 package vn.chohoa.flower.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.sun.istack.NotNull;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 import vn.chohoa.flower.util.PartnerEnum;
 
 import javax.persistence.*;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -15,7 +15,6 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @SuperBuilder
-@ToString(exclude = {"role", "person"})
 @Table(uniqueConstraints = {@UniqueConstraint(columnNames = "person_id")})
 public class User extends BaseModel {
 
@@ -40,7 +39,8 @@ public class User extends BaseModel {
     @ManyToMany(fetch = FetchType.LAZY)
     private List<Role> roles = new ArrayList<>();
 
-    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)//
+    @ToString.Exclude
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     private Person person;
 
     @Builder.Default
@@ -51,7 +51,10 @@ public class User extends BaseModel {
     private String reasonSpam;
 
     @ManyToMany(mappedBy = "users")
+    @ToString.Exclude
     List<Conversation> conversations = new ArrayList<>();
 
-
+    @ManyToMany(fetch = FetchType.LAZY, mappedBy = "receivers")
+    @JsonIgnore
+    private List<LogEmail> logEmails;
 }

@@ -3,39 +3,25 @@ package vn.chohoa.flower.mapper;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Mappings;
-import vn.chohoa.flower.dto.ConversationDTO;
-import vn.chohoa.flower.dto.MessageDeleteDTO;
-import vn.chohoa.flower.dto.MessageNewDTO;
-import vn.chohoa.flower.dto.MessageUpdateDTO;
+import vn.chohoa.flower.dto.*;
 import vn.chohoa.flower.model.Conversation;
+
+import java.util.List;
 
 @Mapper(componentModel = "spring")
 public interface ConversationMapper {
 
+
     @Mappings({
-            @Mapping(target = "senderId", source = "senderId"),
-            @Mapping(target = "senderUsername", source = "senderUsername"),
-            @Mapping(target = "content", source = "content"),
-            @Mapping(target = "fileContent", source = "contentFile"),
-            @Mapping(target = "moji", source = "idMoji", ignore = true),
-            @Mapping(target = "users", source = "userIds", ignore = true)
+            @Mapping(source = "userIds",target = "users",ignore = true)
     })
-    Conversation toConversationFromMessageNewDTO(MessageNewDTO mess);
+    Conversation toConversationFromConversationNewDTO(ConversationNewDTO newDTO);
 
 
     @Mappings({
-            @Mapping(source = "users", target = "users", qualifiedByName = "mapUserConWithUser")
+            @Mapping(source = "id",target = "id"),
+            @Mapping(source = "name",target = "name")
     })
     ConversationDTO toConversationDtoFromConversation(Conversation con);
-
-    @Mappings({
-            @Mapping(target = "id", source = "id"),
-            @Mapping(target = "code", source = "code"),
-            @Mapping(target = "senderId", source = "editorId"),
-            @Mapping(target = "senderUsername", source = "editorUsername"),
-            @Mapping(target = "content", source = "content"),
-    })
-    Conversation toConversationFromUpdateMessageDTO(MessageUpdateDTO mess);
-
-
+    List<ConversationDTO> toConversationDtoFromConversation(List<Conversation> con);
 }

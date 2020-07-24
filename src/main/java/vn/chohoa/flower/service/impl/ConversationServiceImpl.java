@@ -1,26 +1,31 @@
 package vn.chohoa.flower.service.impl;
 
 import com.google.common.collect.ImmutableMap;
-import org.apache.tomcat.util.bcel.Const;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import vn.chohoa.flower.dto.*;
-import vn.chohoa.flower.dto.apiParam.GetListConversationParam;
+import vn.chohoa.flower.dto.apiParam.DeleteParam;
+import vn.chohoa.flower.dto.apiParam.GetConversationParam;
+import vn.chohoa.flower.dto.apiParam.PageParam;
 import vn.chohoa.flower.exception.GeneralException;
 import vn.chohoa.flower.mapper.ConversationMapper;
 import vn.chohoa.flower.model.Conversation;
 import vn.chohoa.flower.model.User;
+import vn.chohoa.flower.model.UserAuditModel;
 import vn.chohoa.flower.repository.ConversationRepository;
-import vn.chohoa.flower.repository.MojiRepository;
+import vn.chohoa.flower.repository.MessageRepository;
 import vn.chohoa.flower.repository.UserRepository;
 import vn.chohoa.flower.service.ConversationService;
 import vn.chohoa.flower.util.Constant;
+import vn.chohoa.flower.util.SecurityUtil;
 
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.List;
 
 @Service
@@ -30,7 +35,8 @@ public class ConversationServiceImpl implements ConversationService {
     private ConversationRepository conversationRepository;
 
     @Autowired
-    private MojiRepository mojiRepository;
+    private MessageRepository messageRepository;
+
 
     @Autowired
     private ConversationMapper conversationMapper;
@@ -39,77 +45,11 @@ public class ConversationServiceImpl implements ConversationService {
     private UserRepository userRepository;
 
     @Override
-    public ActionDTO createMessage(MessageNewDTO message) {
+    public PageDTO findAll(PageParam p) {
 
-        User sender = userRepository.findByIdAndUserName(message.getSenderId(), message.getSenderUsername());
+        Pageable pageable = PageRequest.of(p.getPageNo() - 1, p.getPageSize(), Sort.by("id").descending());
 
-        if (sender == null) {
-            throw new GeneralException(Constant.RESPONSE.CODE.C404,
-                    Constant.RESPONSE.MESSAGE.C404_SENDER);
-        }
-
-        if (message.getUserIds() == null) {
-            throw new GeneralException(Constant.RESPONSE.CODE.C800, Constant.RESPONSE.MESSAGE.C800_RECEIVER);
-        }
-
-        for (Long i : message.getUserIds()) {
-            userRepository.findById(i).orElseThrow(
-                    () -> new GeneralException(Constant.RESPONSE.CODE.C404,
-                            Constant.RESPONSE.MESSAGE.C404_RECEIVER)
-            );
-        }
-
-        if (message.getIdMoji() != null) {
-
-            mojiRepository.findById(message.getIdMoji()).orElseThrow(
-                    () -> new GeneralException(Constant.RESPONSE.CODE.C404,
-                            Constant.RESPONSE.MESSAGE.C404_MOJI)
-            );
-        }
-
-        if (message.getIdMoji() == null && message.getContent() == null && message.getContentFile() == null) {
-            throw new GeneralException(Constant.RESPONSE.CODE.C400,
-                    Constant.RESPONSE.MESSAGE.C400_DATA);
-        }
-
-        Conversation conversation = conversationMapper.toConversationFromMessageNewDTO(message);
-
-        List<User> users = new ArrayList<>();
-        for (Long i : message.getUserIds()) {
-            users.add(userRepository.findByID(i));
-        }
-        conversation.setUsers(users);
-
-        conversation.setCode(makeCode(message.getUserIds()));
-
-        if (message.getIdMoji() != null) {
-            conversation.setMoji(mojiRepository.findByID(message.getIdMoji()));
-        }
-        conversation.setIsSpam(false);
-
-        conversation.setIsView(false);
-
-        conversation.setIsSend(true);
-
-        conversation.setIsDelete(false);
-
-        conversation = conversationRepository.save(conversation);
-
-        return new ActionDTO(
-                ImmutableMap.builder()
-                        .put(Constant.RESPONSE.JSON_KEY.RETURN_VALUE, conversation.getId())
-                        .build()
-        );
-
-    }
-
-    @Override
-    public PageDTO findConversationByCode(GetListConversationParam p) {
-
-        Pageable pageable = PageRequest.of(p.getPageNo() - 1, p.getPageSize(),
-                Sort.by("id").descending());
-
-        final Page<Conversation> page = conversationRepository.findByCode(pageable, p.getCode());
+        final Page<Conversation> page = conversationRepository.findAllV2(pageable);
 
         List<ConversationDTO> list = page.map(conversationMapper::toConversationDtoFromConversation).getContent();
 
@@ -122,119 +62,187 @@ public class ConversationServiceImpl implements ConversationService {
     }
 
     @Override
-    public ActionDTO updateContentMessage(MessageUpdateDTO message) {
+    public RsDTO findbyUserId(GetConversationParam p) {
 
-        Conversation con = conversationRepository.findByCodeAndId(message.getId(), message.getCode());
-        if (con == null) {
-            throw new GeneralException(Constant.RESPONSE.CODE.C404,
-                    Constant.RESPONSE.MESSAGE.C404);
-        }
+        List<ConversationDTO> list = conversationMapper.toConversationDtoFromConversation(
+                conversationRepository.findByUser(p.getId())
+        );
 
-        User user = userRepository.findByIdAndUserName(message.getEditorId(), message.getEditorUsername());
-        if (user == null) {
-            throw new GeneralException(Constant.RESPONSE.CODE.C404,
-                    Constant.RESPONSE.MESSAGE.C404_EDIT_USER);
-        }
-
-        if (con.getSenderId() != message.getEditorId() || !con.getSenderUsername().equals(message.getEditorUsername())) {
-            throw new GeneralException(Constant.RESPONSE.CODE.C403,
-                    Constant.RESPONSE.MESSAGE.C403_EDIT_MESSAGE);
-        }
-
-        Conversation conNew = conversationMapper.toConversationFromUpdateMessageDTO(message);
-
-        conNew.setIsDelete(false);
-
-        conNew.setIsSend(true);
-
-        conNew.setIsView(false);
-
-        conNew.setUsers(con.getUsers());
-
-        conNew.setReceivedTime(con.getReceivedTime());
-
-        conNew.setSendedTime(con.getSendedTime());
-
-        conNew.setSenderId(con.getSenderId());
-
-        conNew.setSenderUsername(con.getSenderUsername());
-
-        conNew.setMoji(con.getMoji());
-
-        conNew.setFileContent(con.getFileContent());
-
-        conNew = conversationRepository.save(conNew);
-
-        return new ActionDTO(ImmutableMap.builder()
-                .put(Constant.RESPONSE.JSON_KEY.RETURN_VALUE, conNew.getId())
-                .build());
+        return new RsDTO(list);
     }
 
     @Override
-    public ActionDTO deleteContentMessage(MessageDeleteDTO message) {
+    public ActionDTO createConversation(ConversationNewDTO con) {
 
+        if (conversationRepository.findByName(con.getName()) != null) {
+            throw new GeneralException(Constant.RESPONSE.CODE.C409,
+                    Constant.RESPONSE.MESSAGE.C409_CONVERSATION);
+        }
 
-        if (userRepository.findByIdAndUserName(message.getEditorId(), message.getEditorUsername()) == null) {
+        /** kiểm tra số lượng user*/
+        if (con.getUserIds().size() < 2) {
+            throw new GeneralException(Constant.RESPONSE.CODE.C801,
+                    Constant.RESPONSE.MESSAGE.C801_TOTAL_MENBER);
+        }
+
+        List<User> users = userRepository.findAll();
+
+        List<Long> userIds = new ArrayList<>();
+
+        users.forEach(u ->
+                userIds.add(u.getId()));
+
+        if (!userIds.containsAll(con.getUserIds())) {
+
             throw new GeneralException(Constant.RESPONSE.CODE.C404,
-                    Constant.RESPONSE.MESSAGE.C404_EDIT_USER);
-        }
-        Conversation con = conversationRepository.findByCodeAndId(message.getId(), message.getCode());
-        if (con == null) {
-            throw new GeneralException(Constant.RESPONSE.CODE.C404,
-                    Constant.RESPONSE.MESSAGE.C404_CONVERSATION);
-        }
-        if (con.getSenderId() != message.getEditorId() || !con.getSenderUsername().equals(message.getEditorUsername())) {
-            throw new GeneralException(Constant.RESPONSE.CODE.C403,
-                    Constant.RESPONSE.MESSAGE.C403_EDIT_MESSAGE);
+                    Constant.RESPONSE.MESSAGE.C404_USER);
         }
 
-        con.setIsDelete(true);
+        Conversation conversation = conversationMapper.toConversationFromConversationNewDTO(con);
 
-        con = conversationRepository.save(con);
+        List<User> newUsers = new ArrayList<>();
 
-        return new ActionDTO(ImmutableMap.builder()
-                .put(Constant.RESPONSE.JSON_KEY.RETURN_VALUE, con.getId())
-                .build());
+        for (Long i : con.getUserIds()) {
+            newUsers.add(userRepository.findByID(i));
+        }
 
+        conversation.setUsers(newUsers);
+
+        conversation.setCode(makeCode(con.getName()));
+
+        conversation.setIsView(true);
+        conversation.setIsDelete(false);
+        conversation.setIsActive(true);
+
+        conversation = conversationRepository.save(conversation);
+
+        return new ActionDTO(
+                ImmutableMap.builder()
+                        .put(Constant.RESPONSE.JSON_KEY.RETURN_VALUE, conversation.getId())
+                        .build()
+        );
     }
 
     @Override
-    public ActionDTO isViewMessage(MessageViewerDTO message) {
+    public ActionDTO deleteConversationV2(DeleteParam d) {
+        Conversation conversation = conversationRepository.findById(d.getId()).orElseThrow(
+                ()->new GeneralException(Constant.RESPONSE.CODE.C404,
+                        Constant.RESPONSE.MESSAGE.C404_CONVERSATION)
+        );
 
-        if (userRepository.findByIdAndUserName(message.getViewerId(), message.getViewerUsername()) == null) {
-            throw new GeneralException(Constant.RESPONSE.CODE.C404,
-                    Constant.RESPONSE.MESSAGE.C404_VIEW_USER);
+//        Long id = SecurityUtil.getCurrentUserId();
+//
+//        User user = userRepository.findById(id).orElseThrow(
+//
+//                () -> new GeneralException(Constant.RESPONSE.CODE.C404,
+//                        Constant.RESPONSE.MESSAGE.C403_EDIT_CONVERSATION)
+//        );
+
+        conversation.setIsDelete(true);
+
+        if (!messageRepository.findByConversation(conversation).isEmpty()) {
+            messageRepository.deleteMessageByConversationId(d.getId());
         }
 
-        Conversation con = conversationRepository.findByCodeAndId(message.getId(), message.getCode());
-        if (con == null) {
+        conversationRepository.save(conversation);
+
+        return new ActionDTO(
+                ImmutableMap.builder()
+                        .put(Constant.RESPONSE.JSON_KEY.RETURN_VALUE, d.getId())
+                        .build()
+        );
+    }
+
+    @Override
+    public ActionDTO deleteConversation(ConversationDeleteDTO con) {
+
+        Conversation conversation = conversationRepository.findConByCode(con.getCode());
+        if (conversation == null) {
             throw new GeneralException(Constant.RESPONSE.CODE.C404,
                     Constant.RESPONSE.MESSAGE.C404_CONVERSATION);
         }
 
-        if (con.getIsDelete()) throw new GeneralException(Constant.RESPONSE.CODE.C809,
-                Constant.RESPONSE.MESSAGE.C809);
+        Long id = SecurityUtil.getCurrentUserId();
 
-        if (con.getSenderId() != message.getViewerId() && !con.getSenderUsername().equals(message.getViewerUsername())) {
-            con.setIsView(true);
-            con = conversationRepository.save(con);
+        User user = userRepository.findById(id).orElseThrow(
+
+                () -> new GeneralException(Constant.RESPONSE.CODE.C404,
+                        Constant.RESPONSE.MESSAGE.C403_EDIT_CONVERSATION)
+        );
+
+        conversation.setIsDelete(true);
+
+        if (!messageRepository.findByConversation(conversation).isEmpty()) {
+            messageRepository.deleteMessageByConversationId(con.getId());
         }
 
-        return new ActionDTO(ImmutableMap.builder()
-                .put(Constant.RESPONSE.JSON_KEY.RETURN_VALUE, con.getId())
-                .build());
+        conversationRepository.save(conversation);
+
+        return new ActionDTO(
+                ImmutableMap.builder()
+                        .put(Constant.RESPONSE.JSON_KEY.RETURN_VALUE, con.getId())
+                        .build()
+        );
     }
 
-    private String makeCode(List<Long> ids) {
+    @Override
+    public ActionDTO updateUser(UpdateUserConversation u) {
 
-        StringBuilder str = new StringBuilder();
+        Conversation conversation = conversationRepository.findById(u.getId()).orElseThrow(
+                () -> new GeneralException(Constant.RESPONSE.CODE.C404,
+                        Constant.RESPONSE.MESSAGE.C404_CONVERSATION,
+                        u.getId())
+        );
 
-        for (Long i : ids) {
-            str.append(i.toString().toUpperCase());
+//        UserAuditModel user = SecurityUtil.getUserAuditModel();
+//        if (conversation.getCreatedByUserID()!= user.getId()){
+//            throw new GeneralException(Constant.RESPONSE.CODE.C403,
+//                    Constant.RESPONSE.MESSAGE.C403_EDIT_CONVERSATION,
+//                    user.getId);
+//        }
+
+        List<User> users = new ArrayList<>();
+        for (Long i : u.getIds()) {
+            users.add(
+                    userRepository.findById(i).orElseThrow(
+                            () -> new GeneralException(Constant.RESPONSE.CODE.C404,
+                                    Constant.RESPONSE.MESSAGE.C404_USER,
+                                    i)
+                    )
+            );
         }
 
-        return str.toString();
+        List<User> menbers = conversation.getUsers();
+
+
+        if (u.getFlag() == true) {
+
+            menbers.addAll(users);
+
+        } else {
+
+            if (Boolean.FALSE.equals(menbers.containsAll(users))) {
+                throw new GeneralException(Constant.RESPONSE.CODE.C404,
+                        Constant.RESPONSE.MESSAGE.C404_INVALID_MEMVBER
+                );
+            }
+            menbers.removeAll(users);
+        }
+
+        conversation.setUsers(menbers);
+
+        conversationRepository.save(conversation);
+
+        return new ActionDTO(
+                ImmutableMap.builder()
+                        .put(Constant.RESPONSE.JSON_KEY.RETURN_VALUE, u.getId())
+                        .build()
+        );
     }
 
+
+    private String makeCode(String name) {
+        return Base64.getUrlEncoder().encodeToString(name.getBytes());
+    }
 
 }
