@@ -8,6 +8,7 @@ import vn.chohoa.flower.model.Keyword;
 
 @Repository
 public interface KeywordRepository extends JpaRepository<Keyword, Long> {
+
     @OnDelete(action = OnDeleteAction.CASCADE)
     void deleteByClassNameAndAndRowId(String className,Long rowID);
 }

@@ -52,6 +52,8 @@ public class FileUtil {
 
     public static String multipartfileToFile(MultipartFile file, String dirPath) throws IllegalStateException {
         try {
+
+
             if (file.isEmpty()) {
                 throw new NullPointerException("File not empty");
             }

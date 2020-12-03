@@ -12,12 +12,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-/**
- * Tự tao Userprincipal không sử dụng mặc định của spring security ??
- * <p>
- * đặt jsonignore cho thuộc tính password để bỏ qua filed data khi chuyển thành json
- * để gửi đi
- */
 public class UserPrincipal implements UserDetails {
 
     private Long id;
@@ -34,11 +28,6 @@ public class UserPrincipal implements UserDetails {
     public UserPrincipal() {
     }
 
-    /**
-     * lấy tập quyền của user
-     * chuyển thành list <grandtedAuthority>
-     * tap grandted authori để làm gì??
-     */
     public UserPrincipal(final User user) {
 
         List<GrantedAuthority> authorities = user.getRoles().stream().map(
