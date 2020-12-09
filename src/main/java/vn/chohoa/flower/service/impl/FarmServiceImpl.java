@@ -75,7 +75,7 @@ public class FarmServiceImpl implements FarmService {
     @Override
     public PageDTO findByNameAndOwnerAndIsActive(GetListFarmParam p) {
 
-        Pageable pageable = PageRequest.of(p.getPageNo() - 1, p.getPageSize() - 1, Sort.by("id").descending());
+        Pageable pageable = PageRequest.of(p.getPageNo() - 1, p.getPageSize() , Sort.by("id").descending());
 
         Page<Farm> farmPage = farmRepository.findByNameAndOwnerAndAddressAndIsActive(
                 pageable,

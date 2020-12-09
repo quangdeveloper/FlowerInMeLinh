@@ -1,8 +1,5 @@
 package vn.chohoa.flower.email;
 
-import com.google.common.collect.ImmutableMap;
-import jdk.nashorn.internal.ir.annotations.Immutable;
-import org.apache.logging.log4j.message.SimpleMessage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.FileSystemResource;
@@ -12,17 +9,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
-import org.springframework.scheduling.annotation.EnableScheduling;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
-import vn.chohoa.flower.dto.ActionDTO;
-import vn.chohoa.flower.dto.MailMimeNewDTO;
-import vn.chohoa.flower.dto.MailSimpleNewDTO;
-import vn.chohoa.flower.exception.GeneralException;
 import vn.chohoa.flower.model.AttackFileMail;
 import vn.chohoa.flower.model.LogEmail;
-import vn.chohoa.flower.model.Role;
 import vn.chohoa.flower.model.User;
 import vn.chohoa.flower.repository.LogEmailRepository;
 import vn.chohoa.flower.repository.UserRepository;
@@ -33,8 +22,6 @@ import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
 import javax.transaction.Transactional;
 import java.io.File;
-import java.nio.file.FileSystem;
-import java.nio.file.Path;
 import java.util.*;
 
 @Service
