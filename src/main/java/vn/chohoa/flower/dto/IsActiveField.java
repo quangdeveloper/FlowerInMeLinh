@@ -8,5 +8,5 @@ import lombok.Data;
 public abstract class IsActiveField {
 
     private Boolean isActive = Boolean.FALSE;
-
+//tét commmit new branch
 }
