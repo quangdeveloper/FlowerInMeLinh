@@ -6,7 +6,7 @@ server:
 spring:
   datasource:
     driverClassName: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/flower?useSSL=false&serverTimezone=GMT%2B7&useLegacyDatetimeCode=false&allowPublicKeyRetrieval=true&useUnicode=true&characterEncoding=UTF-8
+    url: jdbc:mysql://localhost:3306/flower
     username: root
     password: quang1998
   jpa:
@@ -44,7 +44,7 @@ spring:
 app:
   firebase-configuration-file: flower-in-me-linh-firebase-adminsdk-41ovu-02f4b827f4.json
   jwt:
-    secret: KYIVtA7915PUEWTqTca74sENpw48u7nkzSJiJmitF7D2PJWOu
+    secret: ACB
     expriedTime: 6000000
 
 config:
